@@ -4,4 +4,25 @@ In order for me to get Jellyfin working on a Mac Mini, accessing media from an e
 
 1. Create a dedicated jellyfin user account using the GUI interface (useradd neglected to address needed enryption keys).
 2. Grant that account the ability to remotely log in (because I was using SSH to administer this macheine and upload media.
-3. Install [[Homebrew|https://brew.sh/]]
+3. Install [Homebrew|https://brew.sh/]
+4. I had to create a proper fstab file to consitently mount the [Satechi HDD|https://satechi.net/products/stand-hub-for-mac-mini-with-ssd-enclosure]
+5. I also installed:
+     - A Bash version 5
+     - GNU Awk (gawk)
+     - yt-dlp
+     - coreutils
+     - time-out
+     - ffmpeg
+     - handbrake
+     - jq
+     - [jc|https://github.com/kellyjonbrazil/jc] json vonversion utility
+     - handbrake
+6. Create the following Process List files:
+     - `/Library/LaunchDaemons/vip.a8545eff.jellyfin.plist`
+     - `/Library/LaunchDaemons/vip.a8545eff.jellyfinmonitor.plist`
+     - `/Library/LaunchDaemons/vip.a8545eff.mountexthdd.plist`
+7. These files control the following scripts
+     - `/usr/local/sbin/mount-uuid` (given a UUID this conditionally mounts the needed hard drive).
+     - `/Users/jellyfin/bin/jellyfin-monitor` Uses curl to check the site and restart if unresponsive
+     - `/Users/jellyfin/bin/start-jellyfin` Waits for the needed fileststem to be ready
+  
