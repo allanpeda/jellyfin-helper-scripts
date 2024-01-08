@@ -10,8 +10,7 @@ In order for me to get Jellyfin working on a Mac Mini, accessing media from an e
      - A Bash version 5
      - GNU Awk (gawk)
      - yt-dlp
-     - coreutils
-     - time-out
+     - coreutils (for the `timeout` utility)
      - ffmpeg
      - handbrake
      - jq
