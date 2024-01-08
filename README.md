@@ -14,7 +14,7 @@ In order for me to get Jellyfin working on a Mac Mini, accessing media from an e
      - ffmpeg
      - handbrake
      - jq
-     - [jc](https://github.com/kellyjonbrazil/jc) json vonversion utility
+     - The [jc](https://github.com/kellyjonbrazil/jc) json conversion utility
      - handbrake
 6. Create the following Process List files:
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfin.plist`
