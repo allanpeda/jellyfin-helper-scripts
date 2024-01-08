@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# if controlled by launchctl:
+# log show --predicate 'subsystem == "vip.a8545eff.mountexthdd"' --info
+
+set -eEuo pipefail
+
+declare -ir START_SECONDS=$SECONDS
+declare -ir TIMEOUT_SECS=20
+declare MOUNTPOINT
+declare -r DEVICE="$1"
+if [[ "${#DEVICE}" -ne 36 ]]; then
+    echo "Bad UUID supplied"
+    exit 1
+fi
+MOUNTPOINT=$(/opt/homebrew/bin/gawk -v DEV="$DEVICE" '$1 ~ DEV {print $2}' /etc/fstab)
+if [[ "${MOUNTPOINT:+x}" != 'x' ]]; then
+    echo "Mount point $MOUNTPOINT not found" >&2
+    exit 1
+fi
+
+declare -i MOUNT_RV=1
+# this may take some time
+while [[ $SECONDS -lt $((START_SECONDS+TIMEOUT_SECS)) ]]
+do
+    # create necessary mountpoint which diskutil so kindly removes
+    if [[ ! -d "$MOUNTPOINT" ]]
+    then
+	mkdir "$MOUNTPOINT"
+    fi
+
+    if mount | grep -wq "$MOUNTPOINT"
+    then
+	MOUNT_RV=0
+	break
+    else
+	diskutil mount "$DEVICE"
+    fi
+    sleep 1
+done
+
+exit $MOUNT_RV

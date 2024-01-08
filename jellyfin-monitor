@@ -1,0 +1,20 @@
+#!/bin/bash
+
+declare -r JELLYFIN='/Applications/Jellyfin.app/Contents/MacOS/jellyfin'
+declare -r PLIST='/Library/LaunchDaemons/vip.a8545eff.jellyfin.plist'
+
+declare -i TLIMIT="${1:-20}"
+if ! /opt/homebrew/bin/timeout $TLIMIT \
+   curl \
+   --silent \
+   --output /dev/null \
+   --location http://localhost:8096
+then
+    if pgrep -f "$JELLYFIN" >/dev/null
+    then
+	launchctl unload "$PLIST"
+	sleep 0.2
+	launchctl load "$PLIST"
+    fi
+fi
+

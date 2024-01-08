@@ -1,0 +1,47 @@
+#!/opt/homebrew/bin/bash
+
+# to redirect to syslog
+# log stream --info --debug --predicate "process == 'syslog'"
+
+set -eEuo pipefail
+
+HB_BASH='/opt/homebrew/bin/bash'
+declare -i HB_BASH_VERSINFO
+HB_BASH_VERSINFO=$("$HB_BASH" -c 'echo $BASH_VERSINFO')
+if [[ "${BASH_VERSINFO[0]}" -lt $HB_BASH_VERSINFO ]]
+then
+    exec "$HB_BASH" "$(realpath ${BASH_SOURCE[0]})"
+fi
+
+# Constants and Vars
+declare -r MOUNTPOINT='/Volumes/EXTHDD'
+declare -r JELLYFIN='/Applications/Jellyfin.app/Contents/MacOS/jellyfin'
+declare -r JWRESOURCES='/Applications/Jellyfin.app/Contents/Resources/jellyfin-web'
+declare -i JELLYPID
+
+if JELLYPID=$(pgrep -f "$JELLYFIN")
+then
+    kill -HUP $JELLYPID
+fi
+
+declare -ir START_SECONDS=$SECONDS
+declare -ir TIMEOUT_SECS=20
+
+declare -i SCRIPT_RV=1
+while [[ $SECONDS -lt $((START_SECONDS+TIMEOUT_SECS)) ]]
+do
+    if grep -qw "$MOUNTPOINT" < <(mount)
+    then
+	SCRIPT_RV=0
+	break
+    fi
+done
+
+if [[ $SCRIPT_RV -gt 0 ]]
+then
+    echo "Timeout starting jellyfin" >&2
+    exit $SCRIPT_RV    
+else
+    exec "$JELLYFIN" --webdir "$JWRESOURCES"
+fi
+
