@@ -15,7 +15,6 @@ In order for me to get Jellyfin working on a Mac Mini as an unattended service, 
      - handbrake
      - jq
      - The [jc](https://github.com/kellyjonbrazil/jc) json conversion utility
-     - handbrake
 6. Create the following Process List files, which can be maually loaded, inspected and controlled via the [launchctl](https://ss64.com/mac/launchctl.html) command:
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfin.plist`
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfinmonitor.plist`
