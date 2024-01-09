@@ -20,7 +20,7 @@ In order for me to get Jellyfin working on a Mac Mini as an unattended service, 
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfinmonitor.plist`
      - `/Library/LaunchDaemons/vip.a8545eff.mountexthdd.plist`
 7. These files control the following scripts
-     - `/usr/local/sbin/mount-uuid` (given a UUID this conditionally mounts the needed hard drive at `/Volumes/EXTHDD` 
+     - `/usr/local/sbin/mount-uuid` (given a UUID this conditionally mounts the needed hard drive at `/Volumes/EXTHDD`)
      - `/Users/jellyfin/bin/jellyfin-monitor` Uses curl to check the site and restart if unresponsive
      - `/Users/jellyfin/bin/start-jellyfin` Waits for the needed fileststem to be ready
   
