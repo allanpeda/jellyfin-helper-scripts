@@ -16,7 +16,7 @@ In order for me to get Jellyfin working on a Mac Mini, without logging via the G
      - jq
      - The [jc](https://github.com/kellyjonbrazil/jc) json conversion utility
      - handbrake
-6. Create the following Process List files:
+6. Create the following Process List files, which can be maually loaded, inspected and controlled via the [launchctl](https://ss64.com/mac/launchctl.html) command:
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfin.plist`
      - `/Library/LaunchDaemons/vip.a8545eff.jellyfinmonitor.plist`
      - `/Library/LaunchDaemons/vip.a8545eff.mountexthdd.plist`
@@ -24,4 +24,6 @@ In order for me to get Jellyfin working on a Mac Mini, without logging via the G
      - `/usr/local/sbin/mount-uuid` (given a UUID this conditionally mounts the needed hard drive at `/Volumes/EXTHDD` 
      - `/Users/jellyfin/bin/jellyfin-monitor` Uses curl to check the site and restart if unresponsive
      - `/Users/jellyfin/bin/start-jellyfin` Waits for the needed fileststem to be ready
+  
+Hint, run *.plist files through `plutil -lint` to test before loading.
   
