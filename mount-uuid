@@ -12,7 +12,7 @@ declare -ir TIMEOUT_SECS=20
 declare MOUNTPOINT
 declare -r DEVICE="$1"
 if [[ "${#DEVICE}" -ne 36 ]]; then
-    echo "Bad UUID supplied"
+    echo "Bad UUID supplied" >&2
     exit 1
 fi
 MOUNTPOINT=$(/opt/homebrew/bin/gawk -v DEV="$DEVICE" '$1 ~ DEV {print $2}' /etc/fstab)
