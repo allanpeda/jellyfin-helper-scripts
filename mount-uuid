@@ -28,7 +28,7 @@ do
     # create necessary mountpoint which diskutil so kindly removes
     if [[ ! -d "$MOUNTPOINT" ]]
     then
-	mkdir "$MOUNTPOINT"
+	mkdir -p "$MOUNTPOINT"
     fi
 
     if mount | grep -wq "$MOUNTPOINT"
