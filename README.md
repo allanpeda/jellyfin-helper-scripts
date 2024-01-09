@@ -2,7 +2,7 @@
 
 In order for me to get Jellyfin working on a Mac Mini, without logging via the GUI, and accessing media from an external 4TB HDD, I had to do the following:
 
-1. Create a dedicated jellyfin user account using the GUI interface (`dscl` neglected to create needed enrcyption keys).
+1. Create a dedicated jellyfin user account using the GUI interface (`dscl` neglected to create needed encryption keys).
 2. Grant that account the ability to remotely log in (because I was using SSH to administer this machine and upload content.
 3. Install [Homebrew](https://brew.sh/)
 4. I had to create a proper fstab file to consitently mount the [Satechi HDD](https://satechi.net/products/stand-hub-for-mac-mini-with-ssd-enclosure)
