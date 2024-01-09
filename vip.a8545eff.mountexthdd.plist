@@ -13,7 +13,7 @@
     <array>
         <string>/bin/bash</string>
         <string>/usr/local/sbin/mount-uuid</string>
-        <string>1C409060-1DB2-45D2-8BFC-BCF99035A03E</string>
+        <string>1C999999-6DB6-4333-8222-BAAAAAAAAAAE</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
