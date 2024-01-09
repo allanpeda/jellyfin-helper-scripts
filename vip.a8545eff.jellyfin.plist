@@ -11,12 +11,14 @@
       <key>HOME</key>
       <string><![CDATA[/Users/jellyfin]]></string>
     </dict>
+    <key>UserName</key>
+    <string>jellyfin</string>
+    <key>GroupName</key>
+    <string>staff</string>
+    <key>InitGroups</key>
+    <true/>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/bin/su</string>
-        <string>-m</string>
-        <string>jellyfin</string>
-        <string>-c</string>
         <string>/Users/jellyfin/bin/start-jellyfin</string>
     </array>
     <key>KeepAlive</key>
