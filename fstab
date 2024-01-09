@@ -1,0 +1,6 @@
+#
+# Warning - this file should only be modified with vifs(8)
+#
+# Failure to do so is unsupported and may be destructive.
+#
+UUID=1C999999-6DB6-4333-8222-BAAAAAAAAAAE /Volumes/EXTHDD apfs rw,nodev,nosuid,noauto,noowners 0 0
