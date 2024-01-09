@@ -2,6 +2,8 @@
 
 # if controlled by launchctl:
 # log show --predicate 'subsystem == "vip.a8545eff.mountexthdd"' --info
+# Given the UUID, this script finds the correct entry in fstab and uses that value
+# to explitly request mounting of that partition.
 
 set -eEuo pipefail
 
