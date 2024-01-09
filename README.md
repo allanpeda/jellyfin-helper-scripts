@@ -7,7 +7,7 @@ In order for me to get Jellyfin working on a Mac Mini, accessing media from an e
 3. Install [Homebrew](https://brew.sh/)
 4. I had to create a proper fstab file to consitently mount the [Satechi HDD](https://satechi.net/products/stand-hub-for-mac-mini-with-ssd-enclosure)
 5. I also installed:
-     - A Bash version 5
+     - A newer Bash (version 5)
      - GNU Awk (gawk)
      - yt-dlp
      - coreutils (for the `timeout` utility)
