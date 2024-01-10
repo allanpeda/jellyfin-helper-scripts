@@ -25,6 +25,3 @@ In order for me to get Jellyfin working on a Mac Mini as an unattended service, 
      - `/Users/jellyfin/bin/start-jellyfin` Waits for the needed fileststem to be ready
   
 Hint, run *.plist files through `plutil -lint` to test before loading.
-
-## To Do
-Per docs [launchd](https://launchd.info/) should allow me to specify the `UserName` in the plist file.
