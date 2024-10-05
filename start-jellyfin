@@ -1,47 +1,110 @@
 #!/opt/homebrew/bin/bash
 
-# to redirect to syslog
+# Launcher for Jellyfin
+# see: /Library/LaunchDaemons/vip.a8545eff.jellyfin.plist
+# to check status:
+# sudo launchctl list  vip.a8545eff.jellyfin
+# to start:
+# sudo launchctl bootstrap system /Library/LaunchDaemons/vip.a8545eff.jellyfin.plist
+# to stop:
+# sudo launchctl bootout system /Library/LaunchDaemons/vip.a8545eff.jellyfin.plist
+# to check syntax
+# plutil -lint /Library/LaunchDaemons/vip.a8545eff.jellyfin.plist
+# Also, to redirect to syslog
 # log stream --info --debug --predicate "process == 'syslog'"
 
 set -eEuo pipefail
 
-HB_BASH='/opt/homebrew/bin/bash'
-declare -i HB_BASH_VERSINFO
-HB_BASH_VERSINFO=$("$HB_BASH" -c 'echo $BASH_VERSINFO')
-if [[ "${BASH_VERSINFO[0]}" -lt $HB_BASH_VERSINFO ]]
+declare TEST='off'
+declare -r HB_BASH='/opt/homebrew/bin/bash'
+if [[ "${BASH:-'x'}" != "$HB_BASH" ]]
 then
-    exec "$HB_BASH" "$(realpath ${BASH_SOURCE[0]})"
+    exec "$HB_BASH" "$(realpath "${BASH_SOURCE[0]}")"
 fi
 
-# Constants and Vars
-declare -r MOUNTPOINT='/Volumes/EXTHDD'
-declare -r JELLYFIN='/Applications/Jellyfin.app/Contents/MacOS/jellyfin'
-declare -r JWRESOURCES='/Applications/Jellyfin.app/Contents/Resources/jellyfin-web'
-declare -i JELLYPID
+if [[ "${TEST,,}" == 'on' ]]; then
+    execf(){
+        echo exec "$@"
+    }
+    killf(){
+        echo kill "$@"
+    }
+else
+    execf(){
+        exec "$@"
+    }
+    killf(){
+        kill "$@"
+    }
+fi
 
+mpgrep(){
+    gawk -v mp="$1" '$3 == mp {f=1} END {exit f ? 0 : 1}' <(mount)
+} # mpgrep()
+
+allfound(){
+    declare -n aa="$1"
+    declare mp
+    for mp in "${!aa[@]}"
+    do
+        if [[ "${aa[$mp]}" != 1 ]]; then
+            return 1
+        fi
+    done
+    return 0
+} # allfound()
+
+
+cd "$HOME"
+
+# Constants and Vars
+declare -A MOUNTPOINTS=()
+_(){
+    unset -f _
+    declare f
+    for f in $(gawk '/^UUID=/ {print $2}' '/etc/fstab')
+    do
+        MOUNTPOINTS["$f"]='0'
+    done
+};_
+declare -r JELLYFIN='/Applications/Jellyfin.app/Contents/MacOS/jellyfin'
+declare -r WEBDIR='/Applications/Jellyfin.app/Contents/Resources/jellyfin-web'
+declare -r FFMPEG='/Applications/Jellyfin.app/Contents/MacOS/ffmpeg'
+declare -r DATADIR='/Users/jellyfin/.local/share/jellyfin'
+declare -r CONFIGDIR='/Users/jellyfin/.local/share/jellyfin/config'
+
+# kill with SIGTERM
+declare -i JELLYPID
 if JELLYPID=$(pgrep -f "$JELLYFIN")
 then
-    kill -HUP $JELLYPID
+    killf -s SIGTERM $JELLYPID
 fi
 
 declare -ir START_SECONDS=$SECONDS
 declare -ir TIMEOUT_SECS=20
 
-declare -i SCRIPT_RV=1
 while [[ $SECONDS -lt $((START_SECONDS+TIMEOUT_SECS)) ]]
 do
-    if grep -qw "$MOUNTPOINT" < <(mount)
+    for sought in "${!MOUNTPOINTS[@]}"
+    do
+        if mpgrep "$sought" <(mount)
+        then
+            MOUNTPOINTS["$sought"]=1
+        fi
+    done
+    if allfound MOUNTPOINTS
     then
-	SCRIPT_RV=0
-	break
+        break
     fi
 done
 
-if [[ $SCRIPT_RV -gt 0 ]]
+if ! allfound MOUNTPOINTS
 then
     echo "Timeout starting jellyfin" >&2
-    exit $SCRIPT_RV    
+    exit 1
 else
-    exec "$JELLYFIN" --webdir "$JWRESOURCES"
+    execf "$JELLYFIN" --webdir    "$WEBDIR" \
+                      --ffmpeg    "$FFMPEG" \
+                      --datadir   "$DATADIR" \
+                      --configdir "$CONFIGDIR"
 fi
-
