@@ -18,6 +18,15 @@ then
 fi
 declare releaseid="$1"
 
+for mktp in '/opt/homebrew/bin/gmktemp' '/usr/bin/mktemp'
+do 
+   if grep -qw ^GNU < <("$mktp" --help 2>/dev/null)
+   then
+      mktemp(){ command "$mktp" "$@"; }
+      break
+   fi
+done
+
 declare mbxml jfinxml xsltfile
 declare -r MBURL='https://musicbrainz.org/ws/2/release/'
 mbxml="$(mktemp -t)"
@@ -27,12 +36,14 @@ trap 'rm -f "${mbxml}" "${jfinxml}" "${xsltfile}"' EXIT
 
 # load the XSLT function
 eval "$(awk '/^genxslt\(/ {p=1} p' "$(realpath "${BASH_SOURCE[0]}")")"
+# shellcheck disable=SC2218
 genxslt > "$xsltfile"
 
 xmllint --format - < <(curl -s "${MBURL%/}/${releaseid}?inc=artists+recordings+release-groups")  > "${mbxml}"
 xmlstarlet tr "$xsltfile" "${mbxml}"
 
 exit
+# shellcheck disable=SC2317
 genxslt(){
 cat<<EOF
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0" 
