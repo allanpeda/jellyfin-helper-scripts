@@ -18,20 +18,11 @@ then
 fi
 declare releaseid="$1"
 
-for mktp in '/opt/homebrew/bin/gmktemp' '/usr/bin/mktemp'
-do 
-   if grep -qw ^GNU < <("$mktp" --help 2>/dev/null)
-   then
-      mktemp(){ command "$mktp" "$@"; }
-      break
-   fi
-done
-
 declare mbxml jfinxml xsltfile
 declare -r MBURL='https://musicbrainz.org/ws/2/release/'
-mbxml="$(mktemp -t)"
-jfinxml="$(mktemp -t)"
-xsltfile="$(mktemp -t XXXXXXXX.xslt)"
+mbxml="$(mktemp)"
+jfinxml="$(mktemp)"
+xsltfile="$(mktemp)"
 trap 'rm -f "${mbxml}" "${jfinxml}" "${xsltfile}"' EXIT
 
 # load the XSLT function
