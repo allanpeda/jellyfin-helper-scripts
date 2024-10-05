@@ -4,7 +4,7 @@
 # Script to download MusicBrainz Album XML and convert it to Jellyfin album.nfo
 # Allan Peda
 # October 2024
-# Requires xmllint and xmlstarlet
+# Requires xmllint xmlstarlet
 #
 # Usage:
 # get-albumnfo.sh bd5e5261-c1e8-47b5-973c-b9de1f2f1f85 > album.nfo
@@ -30,7 +30,7 @@ eval "$(awk '/^genxslt\(/ {p=1} p' "$(realpath "${BASH_SOURCE[0]}")")"
 # shellcheck disable=SC2218
 genxslt > "$xsltfile"
 
-xmllint --format - < <(curl -s "${MBURL%/}/${releaseid}?inc=artists+recordings+release-groups")  > "${mbxml}"
+curl --silent "${MBURL%/}/${releaseid}?inc=artists+recordings+release-groups" --output "${mbxml}"
 xmlstarlet tr "$xsltfile" "${mbxml}"
 
 exit
