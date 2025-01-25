@@ -1,44 +1,91 @@
 #!/bin/bash
+# if controlled by launchctl:
+# log show --predicate 'subsystem == "vip.a8545eff.mountexthdd"' --info
+# This script finds all UUID entries in fstab and uses the values
+# to explicitly mount of that partition.
+
+declare -r HB_BASH='/opt/homebrew/bin/bash'
+if [[ "${BASH}" != "$HB_BASH" ]]
+then
+    exec "$HB_BASH" "${BASH_SOURCE[0]}"
+fi
 
 # if controlled by launchctl:
 # log show --predicate 'subsystem == "vip.a8545eff.mountexthdd"' --info
-# Given the UUID, this script finds the correct entry in fstab and uses that value
-# to explitly request mounting of that partition.
 
 set -eEuo pipefail
 
+# default MacOS mountpoint
 declare -ir START_SECONDS=$SECONDS
 declare -ir TIMEOUT_SECS=20
-declare MOUNTPOINT
-declare -r DEVICE="$1"
-if [[ "${#DEVICE}" -ne 36 ]]; then
-    echo "Bad UUID supplied" >&2
-    exit 1
-fi
-MOUNTPOINT=$(/opt/homebrew/bin/gawk -v DEV="$DEVICE" '$1 ~ DEV {print $2}' /etc/fstab)
-if [[ "${MOUNTPOINT:+x}" != 'x' ]]; then
-    echo "Mount point $MOUNTPOINT not found" >&2
+declare -A  MOUNTPOINTS=()
+declare -A  MOUNTED=()
+
+mpgrep(){
+    gawk -v mp="$1" '$3 == mp {f=1} END {exit f ? 0 : 1}' <(mount)
+} # mpgrep()
+
+allfound(){
+    declare -n aa="$1"
+    declare mp
+    for mp in "${!aa[@]}"
+    do
+        if [[ "${aa[$mp]}" != 1 ]]; then
+            return 1
+        fi
+    done
+    return 0
+} # allfound()
+
+_(){
+    unset -f _
+    declare uuid mp
+    # save path as value keyed on UUID
+    while IFS=$'\n' read -r mp
+    do
+	uuid="${mp%|*}"
+        MOUNTPOINTS["$uuid"]="${mp#*|}"
+	MOUNTED["$uuid"]=0
+    done < <(gawk '/^UUID=/ {sub(/UUID=/,""); print $1"|"$2}' '/etc/fstab')
+};_
+if [[ ${#MOUNTPOINTS[@]} -lt 1 ]]; then
+    echo "No mount points found" >&2
     exit 1
 fi
 
-declare -i MOUNT_RV=1
 # this may take some time
-while [[ $SECONDS -lt $((START_SECONDS+TIMEOUT_SECS)) ]]
-do
-    # create necessary mountpoint which diskutil so kindly removes
-    if [[ ! -d "$MOUNTPOINT" ]]
-    then
-	mkdir -p "$MOUNTPOINT"
-    fi
+__(){
+    unset -f __
+    declare mp uuid
+    while [[ $SECONDS -lt $((START_SECONDS+TIMEOUT_SECS)) ]]
+    do
+        for uuid in "${!MOUNTPOINTS[@]}"
+        do
+	    mp="${MOUNTPOINTS[$uuid]}"
+            # create necessary mountpoint which diskutil so kindly removes
+            if [[ ! -d "$mp" ]]
+            then
+                mkdir -p "$mp"
+            fi
+            if mpgrep "$mp"
+            then
+                # echo "${uuid}"
+                MOUNTED[$uuid]=1
+            else
+                # mount by UUID
+                diskutil mount "${uuid}"
+            fi
+        done
+        # compound test silences shellcheck
+        if [[ "${#MOUNTED[@]}" -gt 0 ]] && allfound MOUNTED
+        then
+           break
+        fi
+        sleep 1
+    done
+};__
 
-    if mount | grep -wq "$MOUNTPOINT"
-    then
-	MOUNT_RV=0
-	break
-    else
-	diskutil mount "$DEVICE"
-    fi
-    sleep 1
-done
-
-exit $MOUNT_RV
+if ! allfound MOUNTED
+then
+    exit 1
+fi
