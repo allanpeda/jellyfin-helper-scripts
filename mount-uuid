@@ -15,7 +15,7 @@ fi
 
 set -eEuo pipefail
 
-# default MacOS mountpoint
+# Globals
 declare -ir START_SECONDS=$SECONDS
 declare -ir TIMEOUT_SECS=20
 declare -A  MOUNTPOINTS=()
