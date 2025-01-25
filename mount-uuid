@@ -48,7 +48,7 @@ _(){
 	MOUNTED["$uuid"]=0
     done < <(gawk '/^UUID=/ {sub(/UUID=/,""); print $1"|"$2}' '/etc/fstab')
 };_
-if [[ ${#MOUNTPOINTS[@]} -lt 1 ]]; then
+if [[ ${#MOUNTED[@]} -lt 1 ]]; then
     echo "No mount points found" >&2
     exit 1
 fi
@@ -76,8 +76,7 @@ __(){
                 diskutil mount "${uuid}"
             fi
         done
-        # compound test silences shellcheck
-        if [[ "${#MOUNTED[@]}" -gt 0 ]] && allfound MOUNTED
+        if allfound MOUNTED
         then
            break
         fi
